@@ -12,6 +12,14 @@ import {
   BankTransaction,
 } from '../types';
 
+/**
+ * Demo accounts carry a real PBKDF2 digest of DEMO_PASSWORD so the quick-test
+ * buttons go through the same verification path as a real registration instead
+ * of being waved through. These are published in source, so they are demo
+ * credentials only and grant no real access.
+ */
+export const DEMO_PASSWORD = 'Taxflow1';
+
 export const INITIAL_USERS: User[] = [
   {
     id: 'user-rajesh',
@@ -22,6 +30,10 @@ export const INITIAL_USERS: User[] = [
     joinedDate: '2023-04-10',
     assignedBusinessIds: ['biz-nexify', 'biz-bharat', 'biz-surya'],
     avatarUrl: 'RS',
+    authProvider: 'email',
+    passwordSalt: 'L2yDoYuYq36I7A5PFwZS2Q==',
+    passwordHash: 'khHWEYBxfZrC1xGQRgs1Js4Lssnff4DHW3h8kK0URFs=',
+    passwordIterations: 210000,
   },
   {
     id: 'user-priya',
@@ -32,6 +44,10 @@ export const INITIAL_USERS: User[] = [
     joinedDate: '2023-05-15',
     assignedBusinessIds: ['biz-nexify', 'biz-bharat', 'biz-surya'],
     avatarUrl: 'PM',
+    authProvider: 'email',
+    passwordSalt: 'Mz19UliKUvm5jsOUmvNttw==',
+    passwordHash: 'h4WCedMvciqGhfjVg+dejhYf4DnUnBdqa23gxYKNZ0c=',
+    passwordIterations: 210000,
   },
   {
     id: 'user-admin',
@@ -41,6 +57,10 @@ export const INITIAL_USERS: User[] = [
     isActive: true,
     joinedDate: '2022-01-01',
     avatarUrl: 'AV',
+    authProvider: 'email',
+    passwordSalt: 'b3c8SWq4MG7/aliriMVcjw==',
+    passwordHash: '0Df9Sg4yDg7PF8c5oXvGuYi+Ls8aE3vl2IQOXW01c+Y=',
+    passwordIterations: 210000,
   },
 ];
 

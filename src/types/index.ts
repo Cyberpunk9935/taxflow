@@ -13,6 +13,16 @@ export interface User {
   avatarUrl?: string;
   authProvider?: 'email' | 'google';
   profilePictureUrl?: string;
+  /**
+   * PBKDF2-SHA256 digest of the password, base64. Never the password itself.
+   * Absent on demo/seeded and Google accounts, which cannot be signed into
+   * with the email form.
+   */
+  passwordHash?: string;
+  /** Per-account random salt, base64. */
+  passwordSalt?: string;
+  /** Iteration count the digest was produced with. */
+  passwordIterations?: number;
 }
 
 export type BusinessType = 'Private Limited' | 'LLP' | 'Sole Proprietorship' | 'Partnership';

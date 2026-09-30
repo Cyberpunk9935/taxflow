@@ -120,5 +120,51 @@ if (GOOGLE_CLIENT_ID) {
   pass++; // no client id configured in this environment
 }
 
-console.log(`\nPASS ${pass}  FAIL ${fail}`);
-if (fail > 0) process.exit(1);
+// ---------------------------------------------------------------------------
+// Password verification - the real regression guard for the login hole
+// ---------------------------------------------------------------------------
+
+const run = async () => {
+  const { createPasswordRecord, verifyPassword, canAttemptEmailLogin, hasPassword } =
+    await import('../src/lib/passwordCrypto');
+  const { INITIAL_USERS, DEMO_PASSWORD } = await import('../src/services/storage');
+
+  const password = 'Taxflow1';
+  const record = await createPasswordRecord(password);
+  check('record stores a salt', record.salt.length > 0);
+  check('record stores a hash', record.hash.length > 0);
+  check('plaintext is never stored in the record', !JSON.stringify(record).includes(password));
+  check('two records for the same password differ (random salt)', (await createPasswordRecord(password)).salt !== record.salt);
+
+  check('correct password verifies', await verifyPassword(password, record));
+  check('wrong password rejected', !(await verifyPassword('WrongPass1', record)));
+  check('empty password rejected', !(await verifyPassword('', record)));
+  check('missing record rejected', !(await verifyPassword(password, undefined)));
+  check('corrupt salt rejected', !(await verifyPassword(password, { salt: '!!not-base64!!', hash: record.hash })));
+  check('empty hash rejected', !(await verifyPassword(password, { salt: record.salt, hash: '' })));
+
+  // Seeded demo accounts must go through real verification, not a bypass.
+  const rajesh = INITIAL_USERS.find((u) => u.email === 'rajesh@nexify.com')!;
+  check('seeded demo user has a digest', hasPassword(rajesh));
+  check('seeded demo user can attempt email login', canAttemptEmailLogin(rajesh));
+  check('seeded demo password verifies', await verifyPassword(DEMO_PASSWORD, {
+    salt: rajesh.passwordSalt!,
+    hash: rajesh.passwordHash!,
+    iterations: rajesh.passwordIterations,
+  }));
+  check('seeded demo rejects a wrong password', !(await verifyPassword('password123', {
+    salt: rajesh.passwordSalt!,
+    hash: rajesh.passwordHash!,
+    iterations: rajesh.passwordIterations,
+  })));
+
+  // Accounts with no digest must never authenticate via the email form.
+  const noDigest = user({ authProvider: 'email' });
+  check('user without digest cannot attempt login', !canAttemptEmailLogin(noDigest));
+  check('google user cannot attempt email login', !canAttemptEmailLogin(user({ authProvider: 'google', passwordHash: 'x', passwordSalt: 'y' })));
+
+  console.log(`\nPASS ${pass}  FAIL ${fail}`);
+  if (fail > 0) process.exit(1);
+};
+
+run();

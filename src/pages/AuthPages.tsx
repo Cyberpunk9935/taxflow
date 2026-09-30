@@ -11,6 +11,8 @@ import {
   validateRegistration,
   type RegistrationErrors,
 } from '../lib/authRules';
+import { canAttemptEmailLogin, createPasswordRecord, verifyPassword } from '../lib/passwordCrypto';
+import { DEMO_PASSWORD } from '../services/storage';
 
 interface AuthPagesProps {
   initialMode?: 'login' | 'register';
@@ -99,6 +101,23 @@ export const AuthPages: React.FC<AuthPagesProps> = ({
       .substring(0, 2)
       .toUpperCase();
 
+  // Shared failure path so every rejected sign-in looks identical to the user.
+  const rejectLogin = () => {
+    const nextAttempts = failedAttempts + 1;
+    setFailedAttempts(nextAttempts);
+    setShakeCard(true);
+    setTimeout(() => setShakeCard(false), 500);
+
+    if (nextAttempts >= FAILED_ATTEMPT_LIMIT) {
+      setRateLimitCountdown(RATE_LIMIT_SECONDS);
+      setLoginError(
+        `Too many failed login attempts. Button locked for ${RATE_LIMIT_SECONDS} seconds.`,
+      );
+    } else {
+      setLoginError(GENERIC_LOGIN_ERROR);
+    }
+  };
+
   // Handle Login Submit
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,30 +126,35 @@ export const AuthPages: React.FC<AuthPagesProps> = ({
     setLoginError('');
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const lookup = findAuthenticatableUser(loginEmail, users);
+    const lookup = findAuthenticatableUser(loginEmail, users);
+    const candidate = lookup.status === 'ok' ? lookup.user : null;
+    const attemptedPassword = loginPassword;
 
-      if (lookup.status === 'ok') {
-        setFailedAttempts(0);
-        onLoginSuccess(lookup.user, rememberMe);
-        return;
-      }
+    // The password must be verified before the account is treated as signed in.
+    // A missing digest (demo/seeded/Google accounts) can never authenticate.
+    const verification = candidate && canAttemptEmailLogin(candidate)
+      ? verifyPassword(attemptedPassword, {
+          salt: candidate.passwordSalt ?? '',
+          hash: candidate.passwordHash ?? '',
+          iterations: candidate.passwordIterations,
+        })
+      : Promise.resolve(false);
 
-      const nextAttempts = failedAttempts + 1;
-      setFailedAttempts(nextAttempts);
-      setShakeCard(true);
-      setTimeout(() => setShakeCard(false), 500);
-
-      if (nextAttempts >= FAILED_ATTEMPT_LIMIT) {
-        setRateLimitCountdown(RATE_LIMIT_SECONDS);
-        setLoginError(
-          `Too many failed login attempts. Button locked for ${RATE_LIMIT_SECONDS} seconds.`,
-        );
-      } else {
-        setLoginError(GENERIC_LOGIN_ERROR);
-      }
-    }, 450);
+    verification
+      .then((valid) => {
+        setIsSubmitting(false);
+        if (candidate && valid) {
+          setFailedAttempts(0);
+          setLoginPassword('');
+          onLoginSuccess(candidate, rememberMe);
+          return;
+        }
+        rejectLogin();
+      })
+      .catch(() => {
+        setIsSubmitting(false);
+        rejectLogin();
+      });
   };
 
   // Handle Register Submit
@@ -154,27 +178,40 @@ export const AuthPages: React.FC<AuthPagesProps> = ({
 
     if (Object.keys(errors).length === 0) {
       setIsSubmitting(true);
-      setTimeout(() => {
-        setIsSubmitting(false);
-        const cleanName = regName.trim();
-        const cleanEmail = normaliseEmail(regEmail);
+      // The digest is derived before the account is created so the plaintext
+      // password is never persisted anywhere.
+      createPasswordRecord(regPassword)
+        .then((record) => {
+          const cleanName = regName.trim();
+          const cleanEmail = normaliseEmail(regEmail);
 
-        const newUser: User = {
-          id: 'user-' + Date.now(),
-          name: cleanName,
-          email: cleanEmail,
-          role: regRole,
-          isActive: true,
-          joinedDate: new Date().toISOString().split('T')[0],
-          avatarUrl: initialsFromName(cleanName),
-          authProvider: 'email',
-        };
+          const newUser: User = {
+            id: 'user-' + Date.now(),
+            name: cleanName,
+            email: cleanEmail,
+            role: regRole,
+            isActive: true,
+            joinedDate: new Date().toISOString().split('T')[0],
+            avatarUrl: initialsFromName(cleanName),
+            authProvider: 'email',
+            passwordHash: record.hash,
+            passwordSalt: record.salt,
+            passwordIterations: record.iterations,
+          };
 
-        onRegisterSuccess(newUser);
-        setToastMessage(`Account created successfully for ${cleanEmail}! Please sign in.`);
-        setLoginEmail(cleanEmail);
-        setMode('login');
-      }, 500);
+          onRegisterSuccess(newUser);
+          setToastMessage(`Account created successfully for ${cleanEmail}! Please sign in.`);
+          setLoginEmail(cleanEmail);
+          setRegPassword('');
+          setRegConfirmPassword('');
+          setMode('login');
+        })
+        .catch(() => {
+          setRegErrors({
+            password: 'Could not secure your password in this browser. Registration failed.',
+          });
+        })
+        .finally(() => setIsSubmitting(false));
     }
   };
 
@@ -270,12 +307,17 @@ export const AuthPages: React.FC<AuthPagesProps> = ({
             <p className="text-[11px] font-bold text-[#1B2430] mb-2 uppercase tracking-wider font-mono">
               Quick Test Credentials:
             </p>
+            <p className="text-[11px] text-[#596579] mb-2 font-normal">
+              Demo profiles are provisioned with the password{' '}
+              <code className="font-mono font-semibold text-[#1B2430]">Taxflow1</code> on first
+              use. Accounts you register yourself set their own password.
+            </p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setLoginEmail('rajesh@nexify.com');
-                  setLoginPassword('password123');
+                  setLoginPassword(DEMO_PASSWORD);
                   setMode('login');
                 }}
                 className="text-[11px] bg-[#FFFFFF] hover:bg-[#FAF8F2] text-[#1B2430] px-2.5 py-1 rounded-lg border border-[#DED8CA] font-medium shadow-2xs cursor-pointer"
@@ -286,7 +328,7 @@ export const AuthPages: React.FC<AuthPagesProps> = ({
                 type="button"
                 onClick={() => {
                   setLoginEmail('priya.ca@taxpro.in');
-                  setLoginPassword('password123');
+                  setLoginPassword(DEMO_PASSWORD);
                   setMode('login');
                 }}
                 className="text-[11px] bg-[#FFFFFF] hover:bg-[#FAF8F2] text-[#1B2430] px-2.5 py-1 rounded-lg border border-[#DED8CA] font-medium shadow-2xs cursor-pointer"
@@ -297,7 +339,7 @@ export const AuthPages: React.FC<AuthPagesProps> = ({
                 type="button"
                 onClick={() => {
                   setLoginEmail('admin@taxflowsmb.com');
-                  setLoginPassword('password123');
+                  setLoginPassword(DEMO_PASSWORD);
                   setMode('login');
                 }}
                 className="text-[11px] bg-[#FFFFFF] hover:bg-[#FAF8F2] text-[#6B21A8] px-2.5 py-1 rounded-lg border border-[#DED8CA] font-medium shadow-2xs cursor-pointer"
