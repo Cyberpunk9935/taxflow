@@ -1,0 +1,6 @@
+{
+  "name": "TaxFlowSMB - Digital Tax Filing Support",
+  "description": "Digital Tax Filing & Advisory Support Platform for Small Businesses with automated progressive slab tax calculations, Section 37 deductible classifications, and multi-role filing workflow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

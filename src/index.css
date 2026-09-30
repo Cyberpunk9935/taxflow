@@ -1,0 +1,652 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #F7F4EC;
+    color: #1B2430;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-headline, .font-serif {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+@layer utilities {
+  .font-headline {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+  .font-serif {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+  .font-body {
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .glacier-glow {
+    box-shadow: 0 2px 8px rgba(11, 34, 57, 0.08);
+  }
+  .ledger-ruled-row {
+    border-bottom: 1px solid rgba(11, 34, 57, 0.1);
+  }
+  .ledger-double-rule {
+    border-bottom: 3px double rgba(11, 34, 57, 0.25);
+  }
+}
+
+/* ============================================================================
+   LIGHT SURFACE THEME  —  inner panels re-skinned to light blue + pastel
+   ----------------------------------------------------------------------------
+   Why this exists
+   The logged-in shell is dark navy with light text, but every inner panel was
+   built from `.glacier-card` / `.ledger-card`, which were painted pure white.
+   Light text on white = invisible, and the pale chart colours vanished.
+
+   How it stays reliable
+   Tailwind v4 puts its utilities in `@layer utilities`, and the cascade layers
+   above are also layers. Anything written here is UNLAYERED, so it always wins
+   over layered utilities regardless of specificity. Selectors are also written
+   with `~=` (exact class token) wherever a background is inspected, so that
+   `bg-[#141c2e]` is treated as a genuinely dark panel while the translucent
+   `bg-[#141c2e]/40` is not silently mistaken for one.
+
+   Reading order of the three themes below:
+     1. card surface          -> light (#B7E8FE + pastel siblings)
+     2. light panels          -> dark ink
+     3. dark panels           -> forced opaque + light ink
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   1. CARD SURFACES
+   ------------------------------------------------------------------------ */
+
+.glacier-card,
+.ledger-card,
+.ledger-paper-subtle {
+  background-color: #B7E8FE;
+  border-color: #7CC4E8;
+  color: #0B2239;
+  box-shadow: 0 1px 3px rgba(11, 34, 57, 0.1), 0 1px 2px rgba(11, 34, 57, 0.06);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.glacier-card:hover,
+.ledger-card:hover {
+  border-color: #4BA3D4;
+  box-shadow: 0 8px 20px rgba(11, 34, 57, 0.16);
+}
+.glacier-card-elevated,
+.ledger-card-elevated {
+  background-color: #B7E8FE;
+  border-color: #7CC4E8;
+  color: #0B2239;
+  box-shadow: 0 16px 40px rgba(11, 34, 57, 0.3);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Colorful variety for cards sitting directly in a grid */
+section.grid > .glacier-card:nth-child(6n + 1),
+div.grid > .glacier-card:nth-child(6n + 1) {
+  background-color: #B7E8FE;
+  border-color: #7CC4E8;
+}
+section.grid > .glacier-card:nth-child(6n + 2),
+div.grid > .glacier-card:nth-child(6n + 2) {
+  background-color: #C3F0DE;
+  border-color: #8BD9BC;
+}
+section.grid > .glacier-card:nth-child(6n + 3),
+div.grid > .glacier-card:nth-child(6n + 3) {
+  background-color: #E2D9FB;
+  border-color: #BCA9EF;
+}
+section.grid > .glacier-card:nth-child(6n + 4),
+div.grid > .glacier-card:nth-child(6n + 4) {
+  background-color: #FCEBC5;
+  border-color: #E6CE8F;
+}
+section.grid > .glacier-card:nth-child(6n + 5),
+div.grid > .glacier-card:nth-child(6n + 5) {
+  background-color: #FBD8E4;
+  border-color: #EDAEC4;
+}
+section.grid > .glacier-card:nth-child(6n),
+div.grid > .glacier-card:nth-child(6n) {
+  background-color: #D6F0F6;
+  border-color: #9FD3E0;
+}
+
+/* ---------------------------------------------------------------------------
+   2. DARK INK ON LIGHT PANELS
+   The design system was written light-on-dark, so most inner text uses pale
+   tokens. Every one of them is remapped here to a readable dark equivalent.
+   `*=` deliberately covers the alpha variants too (text-white/90,
+   text-[#a0b4c4]/70, text-emerald-300/70, ...).
+   ------------------------------------------------------------------------ */
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is(
+    [class*="text-[#e0e8f0]"],
+    [class*="text-[#e0f2fe]"],
+    [class*="text-[#c8eaff]"],
+    [class*="text-[#F7F4EC]"],
+    [class*="text-[#FFFFFF]"],
+    [class*="text-white"]
+  ) {
+  color: #0B2239;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is([class*="text-[#a0b4c4]"], [class*="text-[#88b4cc]"], [class*="text-[#5C6470]"]) {
+  color: #33556E;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is([class*="text-[#7dd3fc]"], [class*="text-sky-400"]) {
+  color: #0369A1;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is([class*="text-[#c8a0f0]"], [class*="text-purple-300"]) {
+  color: #6D28D9;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is(
+    [class*="text-[#ff6b6b]"],
+    [class*="text-red-300"],
+    [class*="text-red-400"],
+    [class*="text-red-600"]
+  ) {
+  color: #B91C1C;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is([class*="text-rose-200"], [class*="text-rose-300"], [class*="text-rose-400"]) {
+  color: #BE123C;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is(
+    [class*="text-emerald-200"],
+    [class*="text-emerald-300"],
+    [class*="text-emerald-400"],
+    [class*="text-emerald-700"],
+    [class*="text-[#15803D]"]
+  ) {
+  color: #046C4E;
+}
+
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is(
+    [class*="text-amber-200"],
+    [class*="text-amber-300"],
+    [class*="text-amber-400"],
+    [class*="text-amber-700"],
+    [class*="text-[#B45309]"]
+  ) {
+  color: #92400E;
+}
+
+/* Low-contrast "muted ink" tokens on a light surface */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is([class*="text-[#596579]"]) {
+  color: #3D4A5C;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated, .ledger-paper-subtle)
+  :is([class*="text-[#8C7A6B]"]) {
+  color: #6B5A4C;
+}
+
+/* Pale separators and borders on a light panel */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class*="border-[#7dd3fc]"],
+    [class*="border-white/"],
+    [class*="divide-[#7dd3fc]"]
+  ) {
+  border-color: #5FA8CE;
+}
+
+/* ---------------------------------------------------------------------------
+   3. DARK SUB-PANELS KEPT LEGIBLE
+   Sub-panels inside a light card use dark backgrounds — but many of them are
+   *translucent* (`bg-[#0e4d6e]/20`, `bg-black/40`, ...). Over the new light
+   card those blend to a LIGHT mid-tone, so light ink would fail contrast.
+   They are therefore forced fully opaque, and their ink is set to light.
+   Tint/background families are grouped so each keeps a hint of its hue.
+   ------------------------------------------------------------------------ */
+
+/* -- deep navy family: made opaque, then given light ink -- */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#141c2e]/40"],
+    [class~="bg-[#141c2e]/50"],
+    [class~="bg-[#141c2e]/60"],
+    [class~="bg-[#141c2e]/70"],
+    [class~="bg-[#141c2e]/80"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#1a2438]/50"],
+    [class~="bg-[#1a2438]/60"],
+    [class~="bg-[#1a2438]/80"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0f1524]/85"],
+    [class~="bg-[#0f1524]/95"],
+    [class~="bg-[#0f1728]"],
+    [class~="bg-[#0e1726]/60"],
+    [class~="bg-[#0e2238]/60"],
+    [class~="bg-[#0b0f19]/40"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#071120]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#202c42]"],
+    [class~="bg-[#283548]"],
+    [class~="bg-[#2B3848]"],
+    [class~="bg-[#1B2430]"],
+    [class~="bg-[#1B2430]/50"]
+  ) {
+  background-color: #16233A;
+}
+
+/* -- deep teal family -- */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/20"],
+    [class~="bg-[#0e4d6e]/25"],
+    [class~="bg-[#0e4d6e]/30"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/50"],
+    [class~="bg-[#0e4d6e]/60"],
+    [class~="bg-[#0e4d6e]/70"]
+  ) {
+  background-color: #0A3A52;
+}
+
+/* -- deep purple family -- */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is([class~="bg-[#3d2060]/30"], [class~="bg-[#3d2060]/50"]) {
+  background-color: #3B1E5E;
+}
+
+/* -- solid action colours stay saturated and get light ink -- */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is([class~="bg-[#15803D]"], [class~="bg-[#166534]"]) {
+  background-color: #14532D;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is([class~="bg-[#1E3A8A]"]) {
+  background-color: #1E3A8A;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is([class~="bg-[#991B1B]"], [class~="bg-[#B91C1C]"]) {
+  background-color: #991B1B;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is([class~="bg-black/40"],
+    [class~="to-[#7dd3fc]/30"]) {
+  background-color: #0B1520;
+}
+
+/* Now that those panels are genuinely dark, restore light ink on them
+   (both when the ink sits on the panel itself and on its descendants). */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#141c2e]/40"],
+    [class~="bg-[#141c2e]/50"],
+    [class~="bg-[#141c2e]/60"],
+    [class~="bg-[#141c2e]/70"],
+    [class~="bg-[#141c2e]/80"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#1a2438]/50"],
+    [class~="bg-[#1a2438]/60"],
+    [class~="bg-[#1a2438]/80"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0f1524]/85"],
+    [class~="bg-[#0f1524]/95"],
+    [class~="bg-[#0f1728]"],
+    [class~="bg-[#0e1726]/60"],
+    [class~="bg-[#0e2238]/60"],
+    [class~="bg-[#0b0f19]/40"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#071120]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#202c42]"],
+    [class~="bg-[#283548]"],
+    [class~="bg-[#2B3848]"],
+    [class~="bg-[#1B2430]"],
+    [class~="bg-[#1B2430]/50"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/20"],
+    [class~="bg-[#0e4d6e]/25"],
+    [class~="bg-[#0e4d6e]/30"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/50"],
+    [class~="bg-[#0e4d6e]/60"],
+    [class~="bg-[#0e4d6e]/70"],
+    [class~="bg-[#3d2060]/30"],
+    [class~="bg-[#3d2060]/50"],
+    [class~="bg-[#15803D]"],
+    [class~="bg-[#166534]"],
+    [class~="bg-[#1E3A8A]"],
+    [class~="bg-[#991B1B]"],
+    [class~="bg-[#B91C1C]"],
+    [class~="bg-black/40"],
+    [class~="to-[#7dd3fc]/30"]
+  ),
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#141c2e]/40"],
+    [class~="bg-[#141c2e]/50"],
+    [class~="bg-[#141c2e]/60"],
+    [class~="bg-[#141c2e]/70"],
+    [class~="bg-[#141c2e]/80"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#1a2438]/50"],
+    [class~="bg-[#1a2438]/60"],
+    [class~="bg-[#1a2438]/80"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0f1524]/85"],
+    [class~="bg-[#0f1524]/95"],
+    [class~="bg-[#0f1728]"],
+    [class~="bg-[#0e1726]/60"],
+    [class~="bg-[#0e2238]/60"],
+    [class~="bg-[#0b0f19]/40"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#071120]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#202c42]"],
+    [class~="bg-[#283548]"],
+    [class~="bg-[#2B3848]"],
+    [class~="bg-[#1B2430]"],
+    [class~="bg-[#1B2430]/50"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/20"],
+    [class~="bg-[#0e4d6e]/25"],
+    [class~="bg-[#0e4d6e]/30"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/50"],
+    [class~="bg-[#0e4d6e]/60"],
+    [class~="bg-[#0e4d6e]/70"],
+    [class~="bg-[#3d2060]/30"],
+    [class~="bg-[#3d2060]/50"],
+    [class~="bg-[#15803D]"],
+    [class~="bg-[#166534]"],
+    [class~="bg-[#1E3A8A]"],
+    [class~="bg-[#991B1B]"],
+    [class~="bg-[#B91C1C]"],
+    [class~="bg-black/40"],
+    [class~="to-[#7dd3fc]/30"]
+  ) * {
+  color: #E8F6FF;
+}
+
+/* Keep accent hues alive on dark panels rather than flattening to white. */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#141c2e]/60"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0f1728]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#283548]"],
+    [class~="bg-[#2B3848]"],
+    [class~="bg-[#1B2430]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"],
+    [class~="bg-[#3d2060]/50"]
+  )
+  :is([class*="text-[#7dd3fc]"], [class*="text-[#c8eaff]"], [class*="text-sky-400"]),
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#141c2e]/60"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0f1728]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#283548]"],
+    [class~="bg-[#2B3848]"],
+    [class~="bg-[#1B2430]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"],
+    [class~="bg-[#3d2060]/50"]
+  )
+  :is([class*="text-[#c8a0f0]"], [class*="text-purple-300"]) {
+  color: #7DD3FC;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#141c2e]/60"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0f1728]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#283548]"],
+    [class~="bg-[#2B3848]"],
+    [class~="bg-[#1B2430]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"],
+    [class~="bg-[#3d2060]/50"]
+  )
+  :is([class*="text-[#c8a0f0]"], [class*="text-purple-300"]) {
+  color: #D8B4FE;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"]
+  )
+  :is([class*="text-emerald-200"], [class*="text-emerald-300"], [class*="text-emerald-400"]) {
+  color: #6EE7B7;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"]
+  )
+  :is([class*="text-amber-200"], [class*="text-amber-300"], [class*="text-amber-400"]) {
+  color: #FCD34D;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"]
+  )
+  :is([class*="text-rose-200"], [class*="text-rose-300"], [class*="text-rose-400"], [class*="text-red-300"]) {
+  color: #FDA4AF;
+}
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="bg-[#141c2e]"],
+    [class~="bg-[#1a2438]"],
+    [class~="bg-[#0f1524]"],
+    [class~="bg-[#0b0f19]/60"],
+    [class~="bg-[#0a101d]"],
+    [class~="bg-[#1e293b]"],
+    [class~="bg-[#0e4d6e]"],
+    [class~="bg-[#0e4d6e]/40"],
+    [class~="bg-[#0e4d6e]/60"]
+  )
+  :is([class*="text-[#a0b4c4]"], [class*="text-[#88b4cc]"], [class*="text-[#5C6470]"]) {
+  color: #B9D4E6;
+}
+
+/* -- light chips/badges inside a card must use dark ink -- */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class*="bg-[#7dd3fc]"],
+    [class*="bg-[#c8a0f0]"],
+    [class*="bg-[#c8eaff]"],
+    [class*="bg-[#38bdf8]"],
+    [class*="bg-[#818cf8]"],
+    [class*="bg-[#f472b6]"],
+    [class*="bg-[#88b4cc]"],
+    [class*="bg-[#c0d8e8]"],
+    [class*="bg-[#7dd3fc]/"],
+    [class*="bg-[#c8a0f0]/"],
+    [class*="bg-[#88b4cc]/"]
+  ),
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class*="bg-[#7dd3fc]"],
+    [class*="bg-[#c8a0f0]"],
+    [class*="bg-[#c8eaff]"],
+    [class*="bg-[#38bdf8]"],
+    [class*="bg-[#818cf8]"],
+    [class*="bg-[#f472b6]"],
+    [class*="bg-[#88b4cc]"],
+    [class*="bg-[#c0d8e8]"],
+    [class*="bg-[#7dd3fc]/"],
+    [class*="bg-[#c8a0f0]/"],
+    [class*="bg-[#88b4cc]/"]
+  ) * {
+  color: #0B2239;
+}
+
+/* -- dark gradient buttons: keep light ink, the gradient is already dark.
+      The descendant form matters: buttons often wrap their label in a span
+      that carries its own text token, which section 2 would otherwise
+      repaint dark. -- */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="from-[#0e4d6e]"],
+    [class~="from-[#0e1726]"],
+    [class~="from-[#0284c7]"],
+    [class~="from-[#0369a1]"],
+    [class~="from-sky-900"],
+    [class~="from-sky-950"],
+    [class~="from-purple-950"],
+    [class~="to-[#0e4d6e]"],
+    [class~="to-[#164e63]"],
+    [class~="to-[#1a3a4e]"],
+    [class~="to-[#090d16]"],
+    [class~="to-[#3d2060]"],
+    [class~="to-indigo-950"],
+    [class~="to-emerald-950"]
+  ),
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  :is(
+    [class~="from-[#0e4d6e]"],
+    [class~="from-[#0e1726]"],
+    [class~="from-[#0284c7]"],
+    [class~="from-[#0369a1]"],
+    [class~="from-sky-900"],
+    [class~="from-sky-950"],
+    [class~="from-purple-950"],
+    [class~="to-[#0e4d6e]"],
+    [class~="to-[#164e63]"],
+    [class~="to-[#1a3a4e]"],
+    [class~="to-[#090d16]"],
+    [class~="to-[#3d2060]"],
+    [class~="to-indigo-950"],
+    [class~="to-emerald-950"]
+  ) * {
+  color: #E8F6FF;
+}
+
+/* This one gradient fades to a LIGHT stop, so a light icon on it would lose
+   contrast over the new light card. Flatten it to a solid deep teal. */
+:is(.glacier-card, .glacier-card-elevated, .ledger-card, .ledger-card-elevated)
+  [class~="to-[#7dd3fc]/30"] {
+  background-image: none !important;
+  background-color: #0A3A52;
+}
+
+/* ---------------------------------------------------------------------------
+   4. CHARTS / SVG on light panels
+   ------------------------------------------------------------------------ */
+
+:is(.glacier-card, .glacier-card-elevated) [stroke="#7dd3fc"] {
+  stroke: #0369A1;
+}
+:is(.glacier-card, .glacier-card-elevated) [fill="#7dd3fc"] {
+  fill: #0369A1;
+}
+:is(.glacier-card, .glacier-card-elevated) [stop-color="#7dd3fc"] {
+  stop-color: #0369A1;
+}
+:is(.glacier-card, .glacier-card-elevated) [stroke="#c8a0f0"] {
+  stroke: #6D28D9;
+}
+:is(.glacier-card, .glacier-card-elevated) [fill="#c8a0f0"] {
+  fill: #6D28D9;
+}
+:is(.glacier-card, .glacier-card-elevated) [stop-color="#c8a0f0"] {
+  stop-color: #6D28D9;
+}
+:is(.glacier-card, .glacier-card-elevated) [stroke="rgba(125,211,252,0.08)"] {
+  stroke: rgba(3, 105, 161, 0.2);
+}
+:is(.glacier-card, .glacier-card-elevated) [style*="conic-gradient"] {
+  background: conic-gradient(
+    #0369A1 0% 38%,
+    #6D28D9 38% 58%,
+    #33556E 58% 73%,
+    #0E7490 73% 85%,
+    #4F46E5 85% 94%,
+    #BE123C 94% 100%
+  ) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Ledger paper scrollbars
+   ------------------------------------------------------------------------ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #EFECE3;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8BFAD;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A89D88;
+}
