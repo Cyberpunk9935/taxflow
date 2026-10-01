@@ -1,5 +1,4 @@
 import { ReceiptScanResult } from '../types';
-import { GoogleGenAI } from '@google/genai';
 
 export interface SampleReceiptPreset {
   id: string;
@@ -121,6 +120,7 @@ export async function analyzeReceiptWithAI(file: {
   // If Gemini API Key is available, invoke Gemini 3.8 Flash
   if (apiKey) {
     try {
+      const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey });
       const prompt = `You are an expert Indian Corporate Tax Auditor and Chartered Accountant.
 Analyze this uploaded receipt / invoice and extract key details, with special focus on Section 37 of the Indian Income Tax Act, 1961.

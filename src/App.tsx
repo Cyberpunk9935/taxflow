@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import {
   User,
   Business,
@@ -33,20 +33,50 @@ import { EntitySwitcherModal } from './components/EntitySwitcherModal';
 // Pages
 import { LandingPage } from './pages/LandingPage';
 import { AuthPages } from './pages/AuthPages';
-import { DashboardPage } from './pages/DashboardPage';
-import { BusinessProfilePage } from './pages/BusinessProfilePage';
-import { IncomePage } from './pages/IncomePage';
-import { ExpensesPage } from './pages/ExpensesPage';
-import { DocumentsPage } from './pages/DocumentsPage';
-import { TaxSummaryPage } from './pages/TaxSummaryPage';
-import { FilingStatusPage } from './pages/FilingStatusPage';
-import { ReportsPage } from './pages/ReportsPage';
-import { NotificationsPage } from './pages/NotificationsPage';
-import { AdminPage } from './pages/AdminPage';
-import { TestsPage } from './pages/TestsPage';
-import { AdvanceTaxPage } from './pages/AdvanceTaxPage';
-import { ScenarioSimulatorPage } from './pages/ScenarioSimulatorPage';
-import { BankReconciliationPage } from './pages/BankReconciliationPage';
+
+// Workspace pages are split into per-tab chunks so the initial download stays
+// small. Each is already rendered conditionally by currentTab, so the lazy
+// boundary adds no new mount/unmount behaviour.
+const DashboardPage = lazy(() =>
+  import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
+);
+const BusinessProfilePage = lazy(() =>
+  import('./pages/BusinessProfilePage').then((m) => ({ default: m.BusinessProfilePage }))
+);
+const IncomePage = lazy(() =>
+  import('./pages/IncomePage').then((m) => ({ default: m.IncomePage }))
+);
+const ExpensesPage = lazy(() =>
+  import('./pages/ExpensesPage').then((m) => ({ default: m.ExpensesPage }))
+);
+const DocumentsPage = lazy(() =>
+  import('./pages/DocumentsPage').then((m) => ({ default: m.DocumentsPage }))
+);
+const TaxSummaryPage = lazy(() =>
+  import('./pages/TaxSummaryPage').then((m) => ({ default: m.TaxSummaryPage }))
+);
+const FilingStatusPage = lazy(() =>
+  import('./pages/FilingStatusPage').then((m) => ({ default: m.FilingStatusPage }))
+);
+const ReportsPage = lazy(() =>
+  import('./pages/ReportsPage').then((m) => ({ default: m.ReportsPage }))
+);
+const NotificationsPage = lazy(() =>
+  import('./pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage }))
+);
+const AdminPage = lazy(() =>
+  import('./pages/AdminPage').then((m) => ({ default: m.AdminPage }))
+);
+const TestsPage = lazy(() => import('./pages/TestsPage').then((m) => ({ default: m.TestsPage })));
+const AdvanceTaxPage = lazy(() =>
+  import('./pages/AdvanceTaxPage').then((m) => ({ default: m.AdvanceTaxPage }))
+);
+const ScenarioSimulatorPage = lazy(() =>
+  import('./pages/ScenarioSimulatorPage').then((m) => ({ default: m.ScenarioSimulatorPage }))
+);
+const BankReconciliationPage = lazy(() =>
+  import('./pages/BankReconciliationPage').then((m) => ({ default: m.BankReconciliationPage }))
+);
 
 const SESSION_STORAGE_KEY = 'taxflow_session_auth';
 
@@ -583,6 +613,13 @@ export default function App() {
 
         {/* Dynamic Canvas Routing */}
         <main className="flex-1 p-3.5 sm:p-6 md:p-8 max-w-full">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-24 text-[#7dd3fc] text-sm font-medium">
+                Loading…
+              </div>
+            }
+          >
 
           {currentTab === 'dashboard' && (
             <DashboardPage
@@ -778,6 +815,7 @@ export default function App() {
           )}
 
           {currentTab === 'tests' && <TestsPage />}
+          </Suspense>
         </main>
       </div>
 
